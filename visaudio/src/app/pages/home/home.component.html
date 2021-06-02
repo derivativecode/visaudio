@@ -1,0 +1,10 @@
+<p>home works!</p>
+
+<div>
+    <input type="file" id="audioPicker" accept="audio/*" (change)="onPress($event);"/>
+    <button (click)="playAnim();">PLAY</button>
+    <button (click)="pauseAnim();">PAUSE</button>
+    <button (click)="resetAnim();">AGAIN</button>
+</div>
+<audio #audio id="audio">No support for audio</audio>
+<canvas #canvas id="canvas"></canvas>

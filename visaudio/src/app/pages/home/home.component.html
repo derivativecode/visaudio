@@ -1,19 +1,12 @@
-<p>home works!</p>
-
-<div>
+<div id="controls">
     <input type="file" id="audioPicker" accept="audio/*" (change)="onPress($event);"/>
-    <button (click)="playAnim();">PLAY</button>
-    <button (click)="pauseAnim();">PAUSE</button>
-    <button (click)="resetAnim();">AGAIN</button>
+    <button class="btn btn-primary" (click)="playAnim();">PLAY</button>
+    <button class="btn btn-primary" (click)="pauseAnim();">PAUSE</button>
+    <button class="btn btn-primary" (click)="resetAnim();">AGAIN</button>
 </div>
+
 <audio #audio id="audio">No support for audio</audio>
 
-
-<div id="wrapper">
-    <div id="title" #title>
-        {{title}}
-    </div>
-    <canvas #canvas id="canvas"></canvas>
-</div>
+<canvas #canvas id="canvas">{{title}}</canvas>
 
 

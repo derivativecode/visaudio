@@ -1,9 +1,8 @@
-import { ThrowStmt } from '@angular/compiler';
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 
 const FFTSIZE = 128;
-//const HEIGHT = ;
-//const WIDTH = ;
+// const HEIGHT = ;
+// const WIDTH = ;
 
 @Component({
   selector: 'app-home',
@@ -11,12 +10,12 @@ const FFTSIZE = 128;
   styleUrls: ['./home.component.sass'],
 })
 
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit {
 
   // VIEW BINDINGs
   @ViewChild('canvas', { static: false })
   canvasElement!: ElementRef;
-  
+
   public canvasCtx!: CanvasRenderingContext2D;
 
   $audioElement!: HTMLAudioElement;
@@ -27,15 +26,15 @@ export class HomeComponent implements OnInit {
   @ViewChild('audioPicker', { static: false })
   audioPickerElement!: ElementRef;
 
-  audioContext = new window.AudioContext(); //|| window.webkitAudioContext)();
-  
-  title = ""
+  audioContext = new window.AudioContext(); // || window.webkitAudioContext)();
+
+  title = '';
 
   constructor() {
 
   }
+
   ngOnInit(): void {
-    
   }
 
   ngAfterViewInit(): void {
@@ -51,9 +50,10 @@ export class HomeComponent implements OnInit {
     const target = event.target as HTMLInputElement;
     const file: File = (target.files as FileList)[0];
     this.title = file.name;
+    console.log(this.title);
     this.$audioElement.src = URL.createObjectURL(file);
     this.$audioElement.load();
-    //this.$audioElement.play();
+    // this.$audioElement.play();
 
     // create media element
     const track = this.audioContext.createMediaElementSource(
@@ -63,12 +63,13 @@ export class HomeComponent implements OnInit {
 
     // Analyzer node
     const analyser = this.audioContext.createAnalyser();
-    analyser.fftSize = FFTSIZE;  //128;  // Number of Stripes
+    analyser.fftSize = FFTSIZE;  // 128;  // Number of Stripes
     track.connect(analyser);
 
     // Creating the array to store the frequency data
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
+
 
     // Some useful constants
     const WIDTH = this.canvasElement.nativeElement.width;
@@ -77,10 +78,33 @@ export class HomeComponent implements OnInit {
     let barHeight;
     let x = 0;
 
+
+    const w = WIDTH;
+    const h = HEIGHT;
+
+    const r1 = Math.min(w, h) * 0.1;    // outer radius
+    const r0 = r1 - 1;                 // inner radius
+
+    const n = 32;                       // number of blocks
+
+    const theta = 2 * Math.PI / n;
+    const phi = theta * 0.45;           // relative half-block width
+
+
+
+    // let tick = 0;
+    // let color = '#FF0000';
+
+    // setInterval( () => {
+    //   //console.log("tick");
+    //   //color = this.redColors();
+    //   tick++;
+    // }, 100);
+
     // Colors used for plotting
     const MATTE_BLACK = '#1A202C';
-    //const WHITE = '#FFFFFF';
-    const WHITE = '#000000'
+    // const WHITE = '#FFFFFF';
+    const WHITE = '#000000';
 
     // The function which will get called on each repaint
     /*
@@ -119,79 +143,79 @@ export class HomeComponent implements OnInit {
         this.canvasCtx.fillStyle = WHITE;
         this.canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
-        // animate (draw) the bars
-          var w = WIDTH;
-          var h = HEIGHT;
 
-          var r1 = Math.min(w, h) * 0.2;    // outer radius
-          var r0 = r1 - 1;                 // inner radius
 
-          var n = 32;                       // number of blocks
+          // animate (draw) the bars
 
-          var theta = 2 * Math.PI / n;
-          var phi = theta * 0.45;           // relative half-block width
+        this.canvasCtx.save();
+          // this.canvasCtx.fillStyle = '#c0c0c0';
+        this.canvasCtx.fillStyle = this.redColors();
+        this.canvasCtx.translate(w / 2, h / 2);      // move to center of circle
 
-          this.canvasCtx.save();
-          //this.canvasCtx.fillStyle = '#c0c0c0';
-          this.canvasCtx.fillStyle = this.redColors();
-          this.canvasCtx.translate(w / 2, h / 2);      // move to center of circle
-
-          for (var j = 0; j < n; ++j) {
-            //for (let i = 0; i < bufferLength; i++) {
+        for (let j = 0; j < n; ++j) {
+              // for (let i = 0; i < bufferLength; i++) {
+              // barHeight = dataArray[(j+tick)%j];
               barHeight = dataArray[j];
+              console.log(barHeight);
               this.canvasCtx.beginPath();
-              this.canvasCtx.arc(0, 0, r0+barHeight/2, -phi, phi);
-              this.canvasCtx.arc(0, 0, r1+barHeight, phi, -phi, true);
-              this.canvasCtx.fillStyle = this.redColors();
+              this.canvasCtx.arc(0, 0, r0 + barHeight / 2, -phi, phi);
+              this.canvasCtx.arc(0, 0, r1 + barHeight, phi, -phi, true);
+              this.canvasCtx.fillStyle = this.redColors(); // this.redCol(barHeight);
               this.canvasCtx.fill();
-              this.canvasCtx.rotate(theta);            // rotate the coordinates by one block
-            //}
+              this.canvasCtx.rotate(theta);            // rotate the coordinates by one block; add integer for interesting effect
+              // }
           }
-          this.canvasCtx.restore();
+        this.canvasCtx.restore();
 
           // // rotate animation even further?
           // var ang = 0;
           // setInterval( () => {
-          //  this.canvasCtx.save();
+          //   console.log("tick");
+          //   this.canvasCtx.save();
           //   this.canvasCtx.translate(WIDTH/2, HEIGHT/2);
           //   this.canvasCtx.rotate(Math.PI / 180 * (ang += 5));
           //   this.canvasCtx.restore();
-          // }, 500);
-        
+          // }, 5000);
       }
     };
     draw();
-
-  };
+  }
 
 
 
 
   // BUTTONS
-  public resetAnim() {
+  public resetAnim(): void {
     this.$audioElement.load();
   }
 
-  public playAnim() {
+  public playAnim(): void {
     this.$audioElement.play();
   }
 
-  public pauseAnim() {
+  public pauseAnim(): void {
     this.$audioElement.pause();
   }
 
 
-  public pastelColors(){
-    var r = (Math.round(Math.random()* 127) + 127).toString(16);
-    var g = (Math.round(Math.random()* 127) + 127).toString(16);
-    var b = (Math.round(Math.random()* 127) + 127).toString(16);
+  public pastelColors(): string {
+    const r = (Math.round(Math.random() * 127) + 127).toString(16);
+    const g = (Math.round(Math.random() * 127) + 127).toString(16);
+    const b = (Math.round(Math.random() * 127) + 127).toString(16);
     return '#' + r + g + b;
   }
 
-  public redColors(){
-    var r = (Math.round(Math.random()* 255)).toString(16);
-    //var g = (Math.round(Math.random()* 2) + 0).toString(16);
-    //var b = (Math.round(Math.random()* 2) + 0).toString(16);
+  public redColors(): string {
+    const r = (Math.round(Math.random() * 255)).toString(16);
+    // var g = (Math.round(Math.random()* 2) + 0).toString(16);
+    // var b = (Math.round(Math.random()* 2) + 0).toString(16);
+    return '#' + r + '00' + '00';
+  }
+
+  public redCol(val: number): string {
+    const r = (Math.round(Math.random() * val)).toString(16);
+    // var g = (Math.round(Math.random()* 2) + 0).toString(16);
+    // var b = (Math.round(Math.random()* 2) + 0).toString(16);
     return '#' + r + '00' + '00';
   }
 }
